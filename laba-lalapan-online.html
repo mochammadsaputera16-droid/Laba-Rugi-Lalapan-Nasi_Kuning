@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laba Rugi Lalapan & Nasi Kuning</title>
+
+<style>
+body { font-family: Arial, sans-serif; background:#f4f4f4; padding:15px; }
+h2 { text-align:center; }
+.card { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; }
+input, select, button {
+  width:100%; padding:8px; margin:6px 0;
+}
+button { background:#28a745; color:#fff; border:none; font-size:16px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { border:1px solid #ccc; padding:6px; text-align:center; }
+th { background:#eee; }
+</style>
+</head>
+
+<body>
+
+<h2>📊 Laba Rugi Lalapan & Nasi Kuning</h2>
+
+<div class="card">
+<label>Tanggal</label>
+<input type="date" id="tanggal">
+
+<label>Produk</label>
+<select id="produk">
+  <option>Lalapan</option>
+  <option>Nasi Kuning</option>
+</select>
+
+<label>Modal (Rp)</label>
+<input type="number" id="modal">
+
+<label>Harga Jual / Porsi</label>
+<input type="number" id="harga">
+
+<label>Jumlah Terjual</label>
+<input type="number" id="jumlah">
+
+<button onclick="simpan()">💾 Simpan</button>
+</div>
+
+<div class="card">
+<h3>📅 Data Penjualan</h3>
+<table>
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Produk</th>
+<th>Modal</th>
+<th>Penjualan</th>
+<th>Laba</th>
+</tr>
+</thead>
+<tbody id="dataTabel"></tbody>
+</table>
+
+<button onclick="exportCSV()">📤 Export ke Excel</button>
+</div>
+
+<div class="card">
+<h3>📆 Total Laba/Rugi</h3>
+<div id="totalLaba"></div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("jual")) || [];
+
+function simpan() {
+  let t = tanggal.value;
+  let p = produk.value;
+  let m = parseInt(modal.value);
+  let h = parseInt(harga.value);
+  let j = parseInt(jumlah.value);
+
+  let jual = h * j;
+  let laba = jual - m;
+
+  data.push({t,p,m,jual,laba});
+  localStorage.setItem("jual", JSON.stringify(data));
+  tampil();
+}
+
+function tampil() {
+  let html = "";
+  let total = 0;
+
+  data.forEach(d => {
+    html += `<tr>
+      <td>${d.t}</td>
+      <td>${d.p}</td>
+      <td>${d.m}</td>
+      <td>${d.jual}</td>
+      <td>${d.laba}</td>
+    </tr>`;
+    total += d.laba;
+  });
+
+  dataTabel.innerHTML = html;
+  totalLaba.innerHTML = "💰 Rp " + total.toLocaleString();
+}
+
+function exportCSV() {
+  let csv = "Tanggal,Produk,Modal,Penjualan,Laba\n";
+  data.forEach(d => {
+    csv += `${d.t},${d.p},${d.m},${d.jual},${d.laba}\n`;
+  });
+
+  let blob = new Blob([csv], { type: "text/csv" });
+  let link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "laporan-penjualan.csv";
+  link.click();
+}
+
+tampil();
+</script>
+
+</body>
+</html>
